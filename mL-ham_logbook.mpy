@@ -148,33 +148,33 @@ def addLogBook() :
   if not getCall :
     return isNull()
 
-  write("Enter the observed signal IN from "+getCall+" (0=poor to 5=excellent): ")
-  getInSig = getstr(10,1,1,"")
+  write("\nEnter the observed signal IN from "+getCall+" in RST format where;\nR: 1=Unreadable to 5=Perfect\nS: 1=Faint to 9=Very Strong\nT: 1=Very rough to 9=Perfect (Example: 599): ")
+  getInSig = getstr(10,3,3,"")
   if not getInSig :
     return isNull()
 
-  write("Enter the reported signal OUT to "+getCall+" (0=poor to 5=excellent): ")
-  getOutSig = getstr(10,1,1,"")
+  write("\nEnter the reported signal OUT to "+getCall+" in RST format where\nR: 1=Unreadable to 5=Perfect\nS: 1=Faint to 9=Very Strong\nT: 1=Very rough to 9=Perfect (Example: 599): ")
+  getOutSig = getstr(10,3,3,"")
   if not getOutSig :
     return isNull()
 
-  write("Enter "+getCall+"'s full name is it was given: ")
+  write("\nEnter "+getCall+"'s full name is it was given: ")
   getName = getstr(3,20,20,"")
   if not getName :
     return isNull()
 
-  write("Enter any notes for this contact: ")
+  write("\nEnter any notes for this contact: ")
   getNotes = getstr(1,40,255,"")
   if not getNotes :
     return isNull()
 
   writeln("|CLHere's what you put:")
   writeln("")
-  writeln("      Date of this contact: "+getDate)
-  writeln("       Contact's CALL-SIGN: "+getCall)
-  writeln(" Contact's observed signal: "+getInSig)
-  writeln("      Your observed signal: "+getOutSig)
-  writeln("       Contact's full name: "+getName)
+  writeln("   Date of this contact: "+getDate)
+  writeln("    Contact's CALL-SIGN: "+getCall)
+  writeln(" Contact's observed RST: "+getInSig)
+  writeln("      Your observed RST: "+getOutSig)
+  writeln("    Contact's full name: "+getName)
   writeln("")
   writeln("Notes:")
   writeln(getNotes)
@@ -234,7 +234,7 @@ def viewLogBook() :
   num = 0
 
   writeln("|CL|CR")
-  writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"Sig IN".ljust(8)+LMAG+"Sig OUT".ljust(8)+LGRY+"Notes".ljust(12))
+  writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"RST IN".ljust(8)+LMAG+"RST OUT".ljust(8)+LGRY+"Notes".ljust(12))
   writeln(" "+LBLK+"="*78+DGRY)
   for LOG in sorted(db["logs"], reverse=True) :
     if db["logs"][LOG]["reportedBy"] == handle :
@@ -270,7 +270,7 @@ def exportLogBook() :
   callsign = db["users"][handle]["callsign"]
   tempFile = script_path+"/"+"mL-ham_logbook_"+callsign.lower()+".csv"
   fHandle = open(tempFile, "w")
-  fHandle.write("Date,Callsign,Name,Sig IN,Sig OUT,Notes\n")
+  fHandle.write("Date,Callsign,Name,RST IN,RST OUT,Notes\n")
   found = False
 
   for LOG in sorted(db["logs"], reverse=False) :
