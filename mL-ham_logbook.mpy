@@ -15,6 +15,34 @@ db = {}
 db["users"] = {}
 db["logs"] = {}
 
+## define FG colours
+DBLK = "|00"
+DBLU = "|01"
+DGRN = "|02"
+DCYN = "|03"
+DRED = "|04"
+DMAG = "|05"
+DYEL = "|06"
+DGRY = "|07"
+LBLK = "|08"
+LBLU = "|09"
+LGRN = "|10"
+LCYN = "|11"
+LRED = "|12"
+LMAG = "|13"
+LYEL = "|14"
+LGRY = "|15"
+
+## define BG colours
+BBLK = "|16"
+BBLU = "|17"
+BGRE = "|18"
+BCYN = "|19"
+BRED = "|20"
+BMAG = "|21"
+BBRN = "|22"
+BGRY = "|23"
+
 def initScreen() :
   writeln("|CL|07")
 
@@ -52,7 +80,7 @@ def showTitle():
 def init():
   write('|CL')
   showTitle()
-  writeln("="*79)
+  writeln(" "+"="*78)
 
 def mainMenu():
   init()
@@ -60,9 +88,10 @@ def mainMenu():
   opts = {
     '1': 'View your logbook entries',
     '2': 'Add a logbook entry',
-    '3': 'Edit a logbook entry',
-    '4': 'Delete a logbook entry',
-    'X': 'Quit back to the BBS'
+    '3': 'Delete a logbook entry',
+    'C': 'Change your user config',
+    'X': 'Export/Download your entire log (CSV)',
+    'Q': 'Quit back to the BBS'
   }
   
   writeln("")
@@ -78,23 +107,29 @@ def mainMenu():
   #writeln(str(cfg))
   write(ind + "|15Choose: ")
 
-  ch = onekey(chr(13) + '1234X', False)
+  ch = onekey(chr(13) + '123CXQ', False)
   write("|CR")
 
-  if ch == 'X':
+  if ch == 'Q':
     finished = "yes"
   if ch == '1':
     viewLogBook()
   if ch == '2':
     addLogBook()
   if ch == '3':
-    editLogBook()
-  if ch == '4':
     delLogBook()
+  if ch == 'C':
+    checkConfig("RESET")
+  if ch == 'X':
+    exportLogBook()
   if ch == 'Y':
     exportScoreboard()
 
   return finished
+
+def isNull() :
+  writeln("|04No input|13. |12Aborted|07|CR|PA")
+  return False
 
 def addLogBook() :
   global db
@@ -102,20 +137,38 @@ def addLogBook() :
   #writeln(str(db))
   #writeln("|PA")
   ts = calendar.timegm(time.gmtime())
-  now = datetime.now().strftime('%Y%m%d%H%M%S')
+  now = datetime.now().strftime('%Y-%m-%d %H:%M')
   writeln("|CL")
-  write("Enter the date for this log entry (YYYYMMDDHHMMSS): ")
-  getDate = getstr(10,14,14,now)
+
+  write("Enter the date for this log entry (YYYY-MM-DD HH:MM): ")
+  getDate = getstr(1,16,16,now)
+  if not getDate :
+    return isNull()
+
   write("Enter the call-sign of the person you made contact with: ")
-  getCall = getstr(2,10,10,"")
+  getCall = getstr(2,10,10,db["users"][handle]["callsign"])
+  if not getCall :
+    return isNull()
+
   write("Enter the observed signal IN from "+getCall+" (0=poor to 5=excellent): ")
   getInSig = getstr(10,1,1,"")
+  if not getInSig :
+    return isNull()
+
   write("Enter the reported signal OUT to "+getCall+" (0=poor to 5=excellent): ")
   getOutSig = getstr(10,1,1,"")
+  if not getOutSig :
+    return isNull()
+
   write("Enter "+getCall+"'s full name is it was given: ")
   getName = getstr(3,20,20,"")
+  if not getName :
+    return isNull()
+
   write("Enter any notes for this contact: ")
   getNotes = getstr(1,40,255,"")
+  if not getNotes :
+    return isNull()
 
   writeln("|CLHere's what you put:")
   writeln("")
@@ -145,29 +198,34 @@ def addLogBook() :
   if ch == 'N' :
     writeln("Aborted")
     writeln("|PA")
-  
 
-def editLogBook() :
-  pass
 
 def delLogBook() :
   global db
   global handle
-  writeln("|CL")
+  found = False
   for LOG in sorted(db["logs"], reverse=True) :
     if db["logs"][LOG]["reportedBy"] == handle :
+      found = True
       writeln(LOG+" ")
-  write("|CREnter the date of the entry to delete: ")
-  getDate = getstr(10,15,15,"")
-  if getDate :
-    if getDate in db["logs"] :
-      del db["logs"][getDate]
-      saveDB()
-      writeln("Deleted: "+getDate)
-      writeln("|PA")
-    else :
-       writeln("No log entry with that date, please check and try again.")
-       writeln("|PA")
+  if found :
+    writeln("|CL")
+    write("|CREnter the date of the entry to delete: ")
+    getDate = getstr(1,16,16,"")
+    if getDate :
+      if getDate in db["logs"] :
+        del db["logs"][getDate]
+        saveDB()
+        writeln("Deleted: "+getDate)
+        writeln("|PA")
+      else :
+         writeln("No log entry with that date, please check and try again.")
+         writeln("|PA")
+  else:
+    writeln("")
+    writeln("No records to delete. Aborted.".center(71))
+    gotoxy(1,23)
+    writeln("|PA")
 
 
 def viewLogBook() :
@@ -175,13 +233,19 @@ def viewLogBook() :
   global handle
 
   found = False
+  num = 0
 
   writeln("|CL|CR")
-  writeln(" "+"Date".ljust(15)+"Callsign".ljust(10)+"Name".ljust(22)+"Sig IN".ljust(8)+"Sig OUT".ljust(8)+"Notes".ljust(15))
-  writeln(" "+"="*78)
+  writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"Sig IN".ljust(8)+LMAG+"Sig OUT".ljust(8)+LGRY+"Notes".ljust(12))
+  writeln(" "+LBLK+"="*78+DGRY)
   for LOG in sorted(db["logs"], reverse=True) :
     if db["logs"][LOG]["reportedBy"] == handle :
       found = True
+      num += 1
+      if num % 2 == 0 :
+        BG = BBLU
+      else :
+        BG = BBLK
       contactCall = str(db["logs"][LOG]["contactCall"])
       observedSig = str(db["logs"][LOG]["observedSig"])
       yourSig = str(db["logs"][LOG]["yourSig"])
@@ -193,14 +257,46 @@ def viewLogBook() :
       else :
         notesAvailable = "N/A"
 
-      writeln(" "+LOG.ljust(15)+contactCall.ljust(10)+theirName.ljust(22)+observedSig.center(8)+yourSig.center(8)+notesAvailable.ljust(15))
+      writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+notesAvailable.ljust(12)+BBLK)
   writeln("")
   #writeln(str(db["logs"]))
   if not found :
-    writeln("No log entries added yet")
+    writeln(" No log entries added yet|CR")
+  gotoxy(1,23)
   writeln("|PA")    
 
-def checkConfig() :
+def exportLogBook() :
+  global db
+  global handle
+
+  callsign = db["users"][handle]["callsign"]
+  tempFile = script_path+"/"+"mL-ham_logbook_"+callsign.lower()+".csv"
+  fHandle = open(tempFile, "a")
+  fHandle.write("Date,Callsign,Name,Sig IN,Sig OUT,Notes\n")
+  found = False
+
+  for LOG in sorted(db["logs"], reverse=False) :
+    if db["logs"][LOG]["reportedBy"] == handle :
+      found = True
+      contactCall = str(db["logs"][LOG]["contactCall"])
+      observedSig = str(db["logs"][LOG]["observedSig"])
+      yourSig = str(db["logs"][LOG]["yourSig"])
+      theirName = str(db["logs"][LOG]["theirName"])
+      notes = str(db["logs"][LOG]["notes"])
+      fHandle.write(LOG+","+contactCall+","+observedSig+","+yourSig+","+theirName+","+notes+"\n")
+  fHandle.close()
+  menucmd('F3',tempFile)
+  os.remove(tempFile)
+  writeln("File exported")
+  writeln("|PA")   
+      
+
+def checkConfig(S = None) :
+  if S :
+    if S.upper() == "RESET" :
+      if handle in db["users"] :
+        del db["users"][handle]
+
   if handle not in db["users"] :
     db["users"][handle] = {}
     isok = False
