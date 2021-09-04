@@ -281,7 +281,7 @@ def exportLogBook() :
       yourSig = str(db["logs"][LOG]["yourSig"])
       theirName = str(db["logs"][LOG]["theirName"])
       notes = str(db["logs"][LOG]["notes"])
-      fHandle.write(LOG+","+contactCall+","+observedSig+","+yourSig+","+theirName+","+notes+"\n")
+      fHandle.write(LOG+","+contactCall+","+theirName+" "+observedSig+","+yourSig+","+notes+"\n")
   fHandle.close()
   menucmd('F3',tempFile)
   os.remove(tempFile)
