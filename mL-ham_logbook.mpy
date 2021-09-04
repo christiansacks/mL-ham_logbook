@@ -90,7 +90,7 @@ def mainMenu():
     '2': 'Add a logbook entry',
     '3': 'Delete a logbook entry',
     'C': 'Change your user config',
-    'X': 'Export/Download your entire log (CSV)',
+    'D': 'Download your entire log (CSV)',
     'Q': 'Quit back to the BBS'
   }
   
@@ -107,7 +107,7 @@ def mainMenu():
   #writeln(str(cfg))
   write(ind + "|15Choose: ")
 
-  ch = onekey(chr(13) + '123CXQ', False)
+  ch = onekey(chr(13) + '123CDQ', False)
   write("|CR")
 
   if ch == 'Q':
@@ -120,10 +120,8 @@ def mainMenu():
     delLogBook()
   if ch == 'C':
     checkConfig("RESET")
-  if ch == 'X':
+  if ch == 'D':
     exportLogBook()
-  if ch == 'Y':
-    exportScoreboard()
 
   return finished
 
@@ -204,12 +202,12 @@ def delLogBook() :
   global db
   global handle
   found = False
+  writeln("|CL")
   for LOG in sorted(db["logs"], reverse=True) :
     if db["logs"][LOG]["reportedBy"] == handle :
       found = True
-      writeln(LOG+" ")
+      writeln(LOG)
   if found :
-    writeln("|CL")
     write("|CREnter the date of the entry to delete: ")
     getDate = getstr(1,16,16,"")
     if getDate :
@@ -271,7 +269,7 @@ def exportLogBook() :
 
   callsign = db["users"][handle]["callsign"]
   tempFile = script_path+"/"+"mL-ham_logbook_"+callsign.lower()+".csv"
-  fHandle = open(tempFile, "a")
+  fHandle = open(tempFile, "w")
   fHandle.write("Date,Callsign,Name,Sig IN,Sig OUT,Notes\n")
   found = False
 
@@ -288,7 +286,10 @@ def exportLogBook() :
   menucmd('F3',tempFile)
   os.remove(tempFile)
   writeln("File exported")
-  writeln("|PA")   
+  writeln("|PA")
+  if not found :
+    writeln("Sorry, no records to export. Aborted.")
+    writeln("|PA")
       
 
 def checkConfig(S = None) :
