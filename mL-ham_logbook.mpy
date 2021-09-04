@@ -8,7 +8,7 @@ script_path = cfg["script"]
 handle = user["handle"]
 name = user["name"]
 canexit = "no"
-version = "0.01[mL]"
+version = "1.01[mL]"
 
 db_filename = script_path+"/"+"mL-ham_logbook.dat"
 db = {}
