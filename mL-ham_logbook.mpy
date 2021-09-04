@@ -154,10 +154,13 @@ def delLogBook() :
   global db
   global handle
   writeln("|CL")
-  write("Enter the date of the entry to delete: ")
+  for LOG in sorted(db["logs"], reverse=True) :
+    if db["logs"][LOG]["reportedBy"] == handle :
+      writeln(LOG+" ")
+  write("|CREnter the date of the entry to delete: ")
   getDate = getstr(10,15,15,"")
   if getDate :
-    if db["logs"][getDate] :
+    if getDate in db["logs"] :
       del db["logs"][getDate]
       saveDB()
       writeln("Deleted: "+getDate)
@@ -174,9 +177,9 @@ def viewLogBook() :
   found = False
 
   writeln("|CL|CR")
-  writeln("Date".ljust(16)+"Callsign".ljust(10)+"Name".ljust(22)+"Sig IN".ljust(8)+"Sig OUT".ljust(8)+"Notes".ljust(15))
-  writeln("="*79)
-  for LOG in db["logs"] :
+  writeln(" "+"Date".ljust(15)+"Callsign".ljust(10)+"Name".ljust(22)+"Sig IN".ljust(8)+"Sig OUT".ljust(8)+"Notes".ljust(15))
+  writeln(" "+"="*78)
+  for LOG in sorted(db["logs"], reverse=True) :
     if db["logs"][LOG]["reportedBy"] == handle :
       found = True
       contactCall = str(db["logs"][LOG]["contactCall"])
@@ -190,7 +193,7 @@ def viewLogBook() :
       else :
         notesAvailable = "N/A"
 
-      writeln(LOG.ljust(16)+contactCall.ljust(10)+theirName.ljust(22)+observedSig.ljust(8)+yourSig.ljust(8)+notesAvailable.ljust(15))
+      writeln(" "+LOG.ljust(15)+contactCall.ljust(10)+theirName.ljust(22)+observedSig.center(8)+yourSig.center(8)+notesAvailable.ljust(15))
   writeln("")
   #writeln(str(db["logs"]))
   if not found :
