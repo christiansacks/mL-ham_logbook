@@ -231,6 +231,7 @@ def viewLogBook() :
   global handle
   secLevel = mci2str('SL')
   filter = handle
+  notesOrName = "Notes"
   if secLevel == "255" :
     gotoxy(22,19)
     write("View [A]ll or [S]elf only: ")
@@ -240,13 +241,14 @@ def viewLogBook() :
       write("SELF")
     if ch == "A" :
       filter = "all"
+      notesOrName = "ReportedBy"
       write("ALL")
 
   found = False
   num = 0
 
   writeln("|CL|CR")
-  writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"RST IN".ljust(8)+LMAG+"RST OUT".ljust(8)+LGRY+"Notes".ljust(12))
+  writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"RST IN".ljust(8)+LMAG+"RST OUT".ljust(8)+LGRY+notesOrName.ljust(12))
   writeln(" "+LBLK+"="*78+DGRY)
   for LOG in sorted(db["logs"], reverse=True) :
     if (filter == "all") or (db["logs"][LOG]["reportedBy"] == handle) :
@@ -267,7 +269,7 @@ def viewLogBook() :
       else :
         notesAvailable = "N/A"
 
-      if secLevel == "255" :
+      if filter == "all" :
         writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+db["logs"][LOG]["reportedBy"].ljust(12)+BBLK)
       else :
         writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+notesAvailable.ljust(12)+BBLK)
