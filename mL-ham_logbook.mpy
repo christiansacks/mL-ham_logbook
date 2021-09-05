@@ -229,6 +229,18 @@ def delLogBook() :
 def viewLogBook() :
   global db
   global handle
+  secLevel = mci2str('SL')
+  filter = handle
+  if secLevel == "255" :
+    gotoxy(22,19)
+    write("View [A]ll or [S]elf only: ")
+    ch = onekey(chr(13) + 'AS', False)
+    if ch == "S" :
+      pass
+      write("SELF")
+    if ch == "A" :
+      filter = "all"
+      write("ALL")
 
   found = False
   num = 0
@@ -237,7 +249,7 @@ def viewLogBook() :
   writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"RST IN".ljust(8)+LMAG+"RST OUT".ljust(8)+LGRY+"Notes".ljust(12))
   writeln(" "+LBLK+"="*78+DGRY)
   for LOG in sorted(db["logs"], reverse=True) :
-    if db["logs"][LOG]["reportedBy"] == handle :
+    if (filter == "all") or (db["logs"][LOG]["reportedBy"] == handle) :
       found = True
       num += 1
       if num % 2 == 0 :
@@ -255,7 +267,10 @@ def viewLogBook() :
       else :
         notesAvailable = "N/A"
 
-      writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+notesAvailable.ljust(12)+BBLK)
+      if secLevel == "255" :
+        writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+db["logs"][LOG]["reportedBy"].ljust(12)+BBLK)
+      else :
+        writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+notesAvailable.ljust(12)+BBLK)
   writeln("")
   #writeln(str(db["logs"]))
   if not found :
