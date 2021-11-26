@@ -137,16 +137,16 @@ def addLogBook() :
   #writeln(str(db))
   #writeln("|PA")
   ts = calendar.timegm(time.gmtime())
-  now = datetime.now().strftime('%Y-%m-%d %H:%M')
+  now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
   writeln("|CL")
 
-  write("Enter the date for this log entry (YYYY-MM-DD HH:MM): ")
+  write("Enter the date for this log entry (YYYY-MM-DD HH:MM:SS): ")
   getDate = getstr(1,16,16,now)
   if not getDate :
     return isNull()
 
   write("Enter the call-sign of the person you made contact with: ")
-  getCall = getstr(2,10,10,db["users"][handle]["callsign"])
+  getCall = getstr(2,10,10,"")
   if not getCall :
     return isNull()
 
@@ -203,24 +203,29 @@ def addLogBook() :
 def delLogBook() :
   global db
   global handle
+  tmpDB = []
   found = False
   writeln("|CL")
   for LOG in sorted(db["logs"], reverse=True) :
     if db["logs"][LOG]["reportedBy"] == handle :
       found = True
-      writeln(LOG)
+      tmpDB.append(LOG)
   if found :
-    write("|CREnter the date of the entry to delete: ")
+    L = len(tmpDB)
+    for I in range(L) :
+      writeln("["+str(I+1)+"] "+tmpDB[I])
+    write("|CREnter the number of the entry to delete: ")
     getDate = getstr(1,16,16,"")
     if getDate :
-      if getDate in db["logs"] :
-        del db["logs"][getDate]
+      NUM = int(getDate) - 1
+      if tmpDB[NUM] in db["logs"] :
+        del db["logs"][tmpDB[NUM]]
         saveDB()
         writeln("Deleted: "+getDate)
         writeln("|PA")
       else :
-         writeln("No log entry with that date, please check and try again.")
-         writeln("|PA")
+        writeln("No log entry with that date, please check and try again.")
+        writeln("|PA")
   else:
     writeln("")
     writeln("No records to delete. Aborted.".center(71))
