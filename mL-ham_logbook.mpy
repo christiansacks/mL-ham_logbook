@@ -121,7 +121,12 @@ def mainMenu():
   if ch == '3':
     delLogBook()
   if ch == 'C':
-    checkConfig("RESET")
+    ind = " ".ljust(15)
+    writeln("")
+    write(ind+"|12Are you sure |07you wish to edit your config (Y/N)? ")
+    check = onekey(chr(13) + 'YN', False)
+    if check == 'Y':
+      checkConfig("RESET")
   if ch == 'D':
     exportLogBook()
 
