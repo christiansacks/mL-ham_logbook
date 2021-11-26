@@ -1,6 +1,6 @@
 from mystic_bbs import *
 from datetime import datetime
-import os, pickle, json, calendar, time, operator, subprocess
+import os, pickle, json, calendar, time, operator, subprocess, requests
 
 user = getuser(0)
 cfg = getcfg(0)
@@ -64,13 +64,15 @@ def loadDB():
 def showTitle():
   global handle
   global db
+  fullname = db["users"][handle]["fullname"]
+  callsign = db["users"][handle]["callsign"]
   who = "By MeaTLoTioN, v" + version
   title = "Amateur Radio Log Book"
   writeln('|CR|11' + title.center(79))
   writeln('|03' + who.center(79) + '|15')
   writeln('|07')
   if handle in db["users"] :
-    footer1 = "|02Handle: |10"+handle+" |05// |02Full name: |10"+name+" |05// |02Call sign: |10"+db["users"][handle]["callsign"]+"|07"
+    footer1 = "|02Handle: |10"+handle+" |05// |02Full name: |10"+fullname+" |05// |02Call sign: |10"+callsign+"|07"
     footer2 = ""
     footer3 = ""
     writeln(footer1.center(79+27))
@@ -333,6 +335,9 @@ def exportLogBook() :
       
 
 def checkConfig(S = None) :
+  global db
+  fullname = db["users"][handle]["fullname"]
+  callsign = db["users"][handle]["callsign"]
   if S :
     if S.upper() == "RESET" :
       if handle in db["users"] :
@@ -347,7 +352,7 @@ def checkConfig(S = None) :
       gotoxy(1,3)
       write("What is your Amateur Radio call sign: ")
       gotoxy(39,3)
-      callsign = getstr(2,40,45,"")
+      callsign = getstr(2,40,45,callsign)
       if callsign :
         writeln("You chose |10"+callsign+"|07, is this ok? (y/n)")
         ch = onekey(chr(13) + 'YN', False)
@@ -365,7 +370,7 @@ def checkConfig(S = None) :
       write("What is your Full Name: ")
       gotoxy(25,6)
       # getstr(mode,width_vis,length_var,default)
-      fullname = getstr(1,40,45,name)
+      fullname = getstr(1,40,45,fullname)
       if fullname :
         writeln("You chose |10"+fullname+"|07, is this ok? (y/n)")
         ch = onekey(chr(13) + 'YN', False)
