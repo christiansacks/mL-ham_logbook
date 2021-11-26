@@ -341,8 +341,6 @@ def exportLogBook() :
 
 def checkConfig(S = None) :
   global db
-  fullname = db["users"][handle]["fullname"]
-  callsign = db["users"][handle]["callsign"]
   if S :
     if S.upper() == "RESET" :
       if handle in db["users"] :
@@ -357,7 +355,7 @@ def checkConfig(S = None) :
       gotoxy(1,3)
       write("What is your Amateur Radio call sign: ")
       gotoxy(39,3)
-      callsign = getstr(2,40,45,callsign)
+      callsign = getstr(2,40,45,"")
       if callsign :
         writeln("You chose |10"+callsign+"|07, is this ok? (y/n)")
         ch = onekey(chr(13) + 'YN', False)
@@ -375,7 +373,7 @@ def checkConfig(S = None) :
       write("What is your Full Name: ")
       gotoxy(25,6)
       # getstr(mode,width_vis,length_var,default)
-      fullname = getstr(1,40,45,fullname)
+      fullname = getstr(1,40,45,"")
       if fullname :
         writeln("You chose |10"+fullname+"|07, is this ok? (y/n)")
         ch = onekey(chr(13) + 'YN', False)
