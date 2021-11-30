@@ -1,6 +1,6 @@
 from mystic_bbs import *
 from datetime import datetime
-import os, pickle, json, calendar, time, operator, subprocess, requests
+import os, pickle, json, calendar, time, operator, subprocess, requests, sys
 
 user = getuser(0)
 cfg = getcfg(0)
@@ -14,6 +14,7 @@ db_filename = script_path+"/"+"mL-ham_logbook.dat"
 db = {}
 db["users"] = {}
 db["logs"] = {}
+isAborted = False
 
 ## define FG colours
 DBLK = "|00"
@@ -346,60 +347,70 @@ def exportLogBook() :
 
 def checkConfig(S = None) :
   global db
+  global isAborted
+  if handle not in db["users"] :
+    writeln("|CLDo you have an Amateur Radio Licence and Call-sign? (Y/N)")
+    ch = onekey(chr(13) + 'YN', False)
+    if ch == 'N' :
+      isAborted = True
+
   if S :
     if S.upper() == "RESET" :
       if handle in db["users"] :
         del db["users"][handle]
+        cStatus = "|CL|07Reconfiguring your details now."
+  else:
+    cStatus = "|CL|07You haven't yet configured your details, lets walk through them now."
 
-  if handle not in db["users"] :
-    db["users"][handle] = {}
-    isok = False
-    while not isok :
-      writeln("|CL|07You haven't yet configured your details, lets walk through them now.")
-      writeln("")
-      gotoxy(1,3)
-      write("What is your Amateur Radio call sign: ")
-      gotoxy(39,3)
-      callsign = getstr(2,40,45,"")
-      if callsign :
-        writeln("You chose |10"+callsign+"|07, is this ok? (y/n)")
-        ch = onekey(chr(13) + 'YN', False)
-        if ch == 'Y' :
-          db["users"][handle]["callsign"] = callsign
-          isok = True
-        if ch == 'N' :
+  if not isAborted :
+    if handle not in db["users"] :
+      db["users"][handle] = {}
+      isok = False
+      while not isok :
+        writeln(cStatus)
+        writeln("")
+        gotoxy(1,3)
+        write("What is your Amateur Radio call sign: ")
+        gotoxy(39,3)
+        callsign = getstr(2,40,45,"")
+        if callsign :
+          writeln("You chose |10"+callsign+"|07, is this ok? (y/n)")
+          ch = onekey(chr(13) + 'YN', False)
+          if ch == 'Y' :
+            db["users"][handle]["callsign"] = callsign
+            isok = True
+          if ch == 'N' :
+            pass
+        else :
           pass
-      else :
-        pass
-
-    isok = False
-    while not isok :
-      gotoxy(1,6)
-      write("What is your Full Name: ")
-      gotoxy(25,6)
-      # getstr(mode,width_vis,length_var,default)
-      fullname = getstr(1,40,45,"")
-      if fullname :
-        writeln("You chose |10"+fullname+"|07, is this ok? (y/n)")
-        ch = onekey(chr(13) + 'YN', False)
-        if ch == 'Y' :
-          db["users"][handle]["fullname"] = fullname
-          isok = True
-        if ch == 'N' :
+  
+      isok = False
+      while not isok :
+        gotoxy(1,6)
+        write("What is your Full Name: ")
+        gotoxy(25,6)
+        # getstr(mode,width_vis,length_var,default)
+        fullname = getstr(1,40,45,"")
+        if fullname :
+          writeln("You chose |10"+fullname+"|07, is this ok? (y/n)")
+          ch = onekey(chr(13) + 'YN', False)
+          if ch == 'Y' :
+            db["users"][handle]["fullname"] = fullname
+            isok = True
+          if ch == 'N' :
+            pass
+        else :
           pass
-      else :
-        pass
-
-  saveDB()
-       
-          
+  
+    saveDB()
 
 ## start main program    
 loadDB()
 checkConfig()
-showTitle()
-
-## main loop
-while canexit == "no":
-  canexit = mainMenu()
-
+if not isAborted :
+  showTitle()
+  
+  ## main loop
+  while canexit == "no":
+    canexit = mainMenu()
+  
