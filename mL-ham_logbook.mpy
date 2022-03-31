@@ -147,7 +147,7 @@ def addLogBook() :
   writeln("|CL")
 
   write("Enter the date for this log entry (YYYY-MM-DD HH:MM:SS): ")
-  getDate = getstr(1,16,16,now)
+  getDate = getstr(1,20,20,now)
   if not getDate :
     return isNull()
 
@@ -222,16 +222,20 @@ def delLogBook() :
       writeln("["+str(I+1)+"] "+tmpDB[I])
     write("|CREnter the number of the entry to delete: ")
     getDate = getstr(1,16,16,"")
-    if getDate :
-      NUM = int(getDate) - 1
-      if tmpDB[NUM] in db["logs"] :
-        del db["logs"][tmpDB[NUM]]
-        saveDB()
-        writeln("Deleted: "+getDate)
-        writeln("|PA")
-      else :
-        writeln("No log entry with that date, please check and try again.")
-        writeln("|PA")
+    try:
+      if getDate :
+        NUM = int(getDate) - 1
+        if tmpDB[NUM] in db["logs"] :
+          del db["logs"][tmpDB[NUM]]
+          saveDB()
+          writeln("Deleted: "+getDate)
+          writeln("|PA")
+        else :
+          writeln("No log entry with that date, please check and try again.")
+          writeln("|PA")
+    except:
+      writeln("You entered invalid data, aborted!")
+      writeln("|PA")
   else:
     writeln("")
     writeln("No records to delete. Aborted.".center(71))
